@@ -1,0 +1,42 @@
+{
+    "Lua.workspace.checkThirdParty": false,
+    "diagnostics.groupSeverity": {
+        "ambiguity": "Error",
+        "await": "Error",
+        "codestyle": "Error",
+        "duplicate": "Hint",
+        "global": "Error",
+        "luadoc": "Error",
+        "redefined": "Information",
+        "strict": "Error",
+        "strong": "Error",
+        "type-check": "Error",
+        "unbalanced": "Error",
+        "unused": "Hint",
+        "conventions": "Error"
+    },
+    "diagnostics.disable": [
+        "duplicate-doc-alias",
+        "duplicate-doc-field"
+    ],
+    "runtime.path": [
+        "?.lua",
+        "?/init.lua",
+        "lua_modules/share/lua/5.1/?.lua",
+        "lua_modules/share/lua/5.1/?/init.lua"
+    ],
+    "runtime.pathStrict": true,
+    "runtime.version": "LuaJIT",
+    "workspace.ignoreDir": [
+        ".vscode",
+        ".luarocks"
+    ],
+    "workspace.library": [
+        "lua_modules/lib/lua/5.1/",
+        "lua_modules/share/lua/5.1/",
+        "/Users/frityet/Library/Application Support/Code/User/globalStorage/sumneko.lua/addonManager/addons/penlight/module/library",
+        "${3rd}/lfs/library",
+    ],
+    "diagnostics.libraryFiles": "Opened",
+    "workspace.useGitIgnore": false,
+}
