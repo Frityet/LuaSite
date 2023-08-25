@@ -23,17 +23,23 @@ local export = {}
 ---@field children (HTML.Node | string | fun(): HTML.Node)[]
 ---@field attributes { [string] : (string | boolean) }
 
+---quotes are allowed in text, not in attributes
 ---@param str string
 ---@return string
-function export.sanitize_string(str)
-    return (str:gsub("[<>&\"']", {
+function export.sanitize_text(str)
+    return (str:gsub("[<>&]", {
         ["<"] = "&lt;",
         [">"] = "&gt;",
-        ["&"] = "&amp;",
-        ["\""] = "&quot;",
-        ["'"] = "&#39;"
+        ["&"] = "&amp;"
     }))
 end
+
+---@param str string
+---@return string
+function export.sanitize_attributes(str)
+    return (export.sanitize_text(str):gsub("\"", "&quot;"):gsub("'", "&#39;"))
+end
+
 
 ---@param x any
 ---@return type | string
@@ -55,7 +61,7 @@ function export.node_to_string(node)
         if type(v) == "boolean" then
             if v then html = html.." "..k end
         else
-            html = html.." "..k.."=\""..export.sanitize_string(v).."\""
+            html = html.." "..k.."=\""..export.sanitize_attributes(v).."\""
         end
     end
 
@@ -63,7 +69,7 @@ function export.node_to_string(node)
 
     for i, v in ipairs(node.children) do
         if type(v) ~= "table" then
-            html = html..export.sanitize_string(tostring(v))
+            html = html..export.sanitize_text(tostring(v))
         else
             html = html..export.node_to_string(v)
         end
@@ -235,11 +241,15 @@ function export.table(tbl)
 end
 export.declare_xml_generator(export.table)
 
----@param css { [string] : { [string | string[]] : (string | string[]) } }
+---@param css { [string | string[]] : { [string | string[]] : (string | string[]) } }
 ---@return HTML.Node
 function export.style(css)
     local css_str = ""
     for selector, properties in pairs(css) do
+        if type(selector) == "table" then
+            selector = table.concat(selector, ", ")
+        end
+
         css_str = css_str..selector.." {\n"
         for property, value in pairs(properties) do
             if type(value) == "table" then
