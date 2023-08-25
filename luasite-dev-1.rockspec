@@ -18,9 +18,10 @@ dependencies = {
 build = {
     type = "builtin",
     modules = {
-        app = "app.lua",
-        config = "config.lua",
-        models = "models.lua",
-        html = "html.lua"
+        ["app"]         = "app.lua",
+        ["config"]      = "config.lua",
+        ["models"]      = "models.lua",
+        ["html"]        = "html.lua",
+        ["pages.todo"]  = "pages/todo.lua"
     }
 }
