@@ -21,7 +21,7 @@ local export = {}
 ---@class HTML.Node
 ---@field tag string
 ---@field children (HTML.Node | string | fun(): HTML.Node)[]
----@field attributes { [string] : string }
+---@field attributes { [string] : (string | boolean) }
 
 ---@param str string
 ---@return string
@@ -52,7 +52,11 @@ function export.node_to_string(node)
     local html = "<"..node.tag
 
     for k, v in pairs(node.attributes) do
-        html = html.." "..k.."=\""..export.sanitize_string(v).."\""
+        if type(v) == "boolean" then
+            if v then html = html.." "..k end
+        else
+            html = html.." "..k.."=\""..export.sanitize_string(v).."\""
+        end
     end
 
     html = html..">"

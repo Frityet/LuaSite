@@ -59,7 +59,9 @@ app:get("/", function(request)
                 h2 "Debug";
 
                 h1 "Here is a table";
-                html_utilities.table(request);
+                div {disabled=true} {
+                    html_utilities.table(request);
+                }
             },
         }
         ---@diagnostic enable: undefined-global
