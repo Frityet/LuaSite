@@ -161,10 +161,7 @@ app:get("/todo", function()
                     end
                 };
 
-                form {
-                    method = "POST";
-                    action = "/todo";
-
+                form {method="POST", action="/todo"} {
                     div {
                         label {["for"]="title"} "Title: ";
 
