@@ -15,8 +15,6 @@
 -- You should have received a copy of the GNU General Public License
 -- along with LuaSite.  If not, see <http://www.gnu.org/licenses/>.
 
-local tabular = require("tabular")
-
 ---@class html_utilities
 local export = {}
 
@@ -126,12 +124,14 @@ function export.declare_xml_generator(fn)
 
                     __tostring = export.node_to_string,
 
+                    ---@param self HTML.Node
+                    ---@param children (HTML.Node | string | fun(): HTML.Node)[]
                     __call = function (self, children)
-                        if type(children) == "string" then
-                            children = { children }
+                        if type(children) ~= "table" then
+                            children = { tostring(children) }
                         end
 
-                        for i, v in ipairs(children) do
+                        for _, v in ipairs(children) do
                             if type(v) == "function" then
                                 export.declare_xml_generator(v)
                                 v = coroutine.wrap(v)
@@ -185,6 +185,76 @@ end
 ---@return HTML.Node
 function export.generate_xml_node(ctx)
     return export.declare_xml_generator(ctx)()
+end
+
+---Turns a lua table into an html table, recursively, with multiple levels of nesting
+---@param tbl table
+---@return HTML.Node
+function export.table(tbl)
+    ---@diagnostic disable: undefined-global
+    return table {
+        function()
+            local function getval(v)
+                if type(v) == "table" then
+                    if (getmetatable(v) or {}).__tostring then
+                        return tostring(v)
+                    else
+                        return html_table(v)
+                    end
+                else
+                    return tostring(v)
+                end
+            end
+
+            for i, v in ipairs(tbl) do
+                yield (
+                    tr {
+                        td(tostring(i));
+                        td(getval(v));
+                    }
+                )
+
+                tbl[i] = nil
+            end
+
+            for k, v in pairs(tbl) do
+                yield (
+                    tr {
+                        td(tostring(k));
+                        td(getval(v));
+                    }
+                )
+            end
+        end
+    }
+    ---@diagnostic enable: undefined-global
+end
+export.declare_xml_generator(export.table)
+
+---@param css { [string] : { [string | string[]] : (string | string[]) } }
+---@return HTML.Node
+function export.style(css)
+    local css_str = ""
+    for selector, properties in pairs(css) do
+        css_str = css_str..selector.." {\n"
+        for property, value in pairs(properties) do
+            if type(value) == "table" then
+                value = table.concat(value, ", ")
+            end
+
+            if type(value) == "table" then
+                value = table.concat(value, ", ")
+            end
+            css_str = css_str.."    "..property..": "..value..";\n"
+        end
+        css_str = css_str.."}\n"
+    end
+
+    return export.generate_xml_node(function ()
+        ---@diagnostic disable: undefined-global
+        return style(css_str)
+        ---@diagnostic enable: undefined-global
+    end)
 end
 
 return export
