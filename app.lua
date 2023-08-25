@@ -208,9 +208,32 @@ app:get("/todo", function()
     end)
 end)
 
-app:post("/todo/:item_name", function(self)
+app:post("/todo", function(request)
+    local title = request.params.title
+    if not title then
+        return { redirect_to = "/todo" }
+    end
+
+    local description = request.params.description or ""
+    local done = request.params.done or false
+
+    if type(done) == "string" then
+        done = done == "on"
+    end
+
+    items[#items+1] = {
+        title = title;
+        description = description;
+        done = done;
+    }
+    save_items()
+
+    return { redirect_to = "/todo" }
+end)
+
+app:post("/todo/:item_name", function(request)
     ---@type string?
-    local item_name = self.params.item_name
+    local item_name = request.params.item_name
 
     if item_name then
         --Replace the %20 with a space
@@ -226,27 +249,6 @@ app:post("/todo/:item_name", function(self)
 
         error("Item "..item_name.." not found!")
     end
-
-    local title = self.params.title
-    if not title then
-        return { redirect_to = "/todo" }
-    end
-
-    local description = self.params.description or ""
-    local done = self.params.done or false
-
-    if type(done) == "string" then
-        done = done == "on"
-    end
-
-    items[#items+1] = {
-        title = title;
-        description = description;
-        done = done;
-    }
-    save_items()
-
-    return { redirect_to = "/todo" }
 end)
 
 return app
